@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>No puedes comprar una casa — y los datos lo prueban</title>
+<meta name="description" content="4.2 millones de avalúos del Índice SHF (2018–2025): la vivienda en México subió 123%, 2.7 veces más que la inflación. Gráficas, modelos de predicción y una calculadora para ver si tú puedes comprar.">
+<meta name="theme-color" content="#0d0d0d">
+<meta property="og:type" content="article">
+<meta property="og:title" content="El sueño de la casa propia ya murió — y los datos lo prueban">
+<meta property="og:description" content="La vivienda en México subió +123% entre 2018 y 2025. La inflación, 46%. Haz la prueba con la calculadora.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
+<style>
+:root{
+  --bg:#0d0d0d;--card:#161616;--card2:#1c1c1c;--border:#262626;
+  --red:#ff3b3b;--orange:#ff8a00;--yellow:#ffe033;--green:#00ff87;--blue:#4da6ff;
+  --white:#f0f0f0;--text:#b4b4b4;--muted:#8f8f8f;--dim:#6e6e6e;--ghost:#2e2e2e;
+  --mono:'JetBrains Mono',ui-monospace,monospace;--display:'Bebas Neue',Impact,sans-serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--white);font-family:'Syne',system-ui,sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")}
+:focus-visible{outline:2px solid var(--yellow);outline-offset:3px}
+a{color:var(--red)}
+.skip{position:absolute;left:-999px;top:0;background:var(--yellow);color:#000;padding:.5rem 1rem;z-index:200;font-family:var(--mono)}
+.skip:focus{left:1rem;top:3rem}
+
+/* TICKER */
+.ticker{background:var(--red);color:#000;font-family:var(--mono);font-size:.72rem;font-weight:700;padding:.5rem 0;overflow:hidden;white-space:nowrap;letter-spacing:.05em;position:sticky;top:0;z-index:100}
+.ticker-inner{display:inline-flex;animation:ticker 45s linear infinite}
+.ticker:hover .ticker-inner{animation-play-state:paused}
+.ticker-inner span{padding-right:1rem}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* HERO */
+.hero{min-height:100vh;min-height:100svh;display:grid;grid-template-rows:1fr auto;padding:6vw;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.hero-bg-text{position:absolute;font-family:var(--display);font-size:30vw;color:rgba(255,59,59,.05);line-height:.85;top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none;user-select:none}
+.hero-tag{font-family:var(--mono);font-size:.72rem;color:var(--red);letter-spacing:.2em;text-transform:uppercase;margin-bottom:2.5rem;display:flex;align-items:center;gap:.8rem;opacity:0;animation:fadeIn .6s .3s forwards}
+.hero-tag::before{content:'';width:24px;height:2px;background:var(--red)}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(4rem,12vw,11rem);line-height:.88;letter-spacing:-.01em;opacity:0;animation:fadeIn .6s .5s forwards;max-width:900px}
+.hero h1 .acc{color:var(--red)}
+.hero h1 .out{-webkit-text-stroke:2px var(--white);color:transparent}
+.hero-desc{font-size:1.1rem;color:var(--text);max-width:560px;line-height:1.75;margin-top:2.5rem;opacity:0;animation:fadeIn .6s .7s forwards}
+.hero-desc strong{color:var(--white)}
+.hero-bottom{display:flex;justify-content:space-between;align-items:flex-end;padding-top:4rem;opacity:0;animation:fadeIn .6s .9s forwards;gap:2rem}
+.hero-stats-row{display:flex;gap:3rem;flex-wrap:wrap}
+.hstat .n{font-family:var(--display);font-size:3.5rem;color:var(--yellow);line-height:1}
+.hstat .l{font-family:var(--mono);font-size:.68rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:.3rem}
+.scroll-down{font-family:var(--mono);font-size:.7rem;color:var(--muted);letter-spacing:.15em;display:flex;flex-direction:column;align-items:center;gap:.5rem;text-decoration:none}
+.scroll-down::after{content:'';width:1px;height:50px;background:linear-gradient(to bottom,var(--muted),transparent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+
+/* SECTIONS */
+section{padding:8vw 6vw;border-bottom:1px solid var(--border)}
+.sec-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4rem;gap:2rem;flex-wrap:wrap}
+.sec-num{font-family:var(--display);font-size:8rem;color:var(--ghost);line-height:1;flex-shrink:0}
+.sec-title-block{flex:1;min-width:260px}
+.sec-label{font-family:var(--mono);font-size:.7rem;color:var(--yellow);letter-spacing:.25em;text-transform:uppercase;margin-bottom:.8rem}
+.sec-title{font-family:var(--display);font-weight:400;font-size:clamp(2.5rem,5vw,4.5rem);line-height:.95;letter-spacing:.01em}
+.sec-body{font-size:1rem;color:var(--text);line-height:1.8;max-width:560px;margin-top:1.2rem}
+.sec-body strong{color:var(--white)}
+.highlight{color:var(--red);font-weight:700}
+
+/* KPI STRIP */
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:3rem}
+.kpi-item{padding:2rem 1.5rem;border-right:1px solid var(--border);position:relative;transition:background .3s}
+.kpi-item:last-child{border-right:none}
+.kpi-item:hover{background:var(--card)}
+.kpi-item::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--c)}
+.kpi-item.red{--c:var(--red)}.kpi-item.yellow{--c:var(--yellow)}.kpi-item.green{--c:var(--green)}.kpi-item.blue{--c:var(--blue)}
+.kpi-val{font-family:var(--display);font-size:2.8rem;line-height:1;margin-bottom:.4rem;color:var(--c)}
+.kpi-label{font-family:var(--mono);font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;line-height:1.5}
+.kpi-sub{font-size:.8rem;color:var(--dim);margin-top:.6rem}
+
+/* CHARTS */
+.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1.5rem;margin-bottom:1.5rem;min-width:0}
+.chart-label{font-family:var(--mono);font-size:.68rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:baseline;gap:.5rem;line-height:1.5}
+.chart-label::before{content:'//';color:var(--red);flex-shrink:0}
+.chart-note{font-family:var(--mono);font-size:.68rem;color:var(--dim);margin-top:.8rem;line-height:1.6}
+.chart{width:100%}
+.chart:empty{background:repeating-linear-gradient(90deg,transparent 0 24px,rgba(255,255,255,.015) 24px 25px)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.grid-2 > .chart-wrap{margin-bottom:0}
+.grid-2{margin-bottom:1.5rem}
+
+/* CALLOUT */
+.callout{border-left:4px solid var(--red);padding:1.5rem 2rem;background:rgba(255,59,59,.05);border-radius:0 4px 4px 0;margin:2rem 0;font-size:1rem;line-height:1.75;color:var(--text)}
+.callout strong{color:var(--white)}
+.callout.yellow{border-color:var(--yellow);background:rgba(255,224,51,.04)}
+.callout.green{border-color:var(--green);background:rgba(0,255,135,.04)}
+
+/* FINDINGS */
+.findings{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-top:1rem}
+.finding{background:var(--card);padding:2rem;transition:background .2s}
+.finding:hover{background:var(--card2)}
+.finding-num{font-family:var(--display);font-size:4rem;color:var(--ghost);line-height:1;margin-bottom:1rem}
+.finding h3{font-size:1.05rem;font-weight:800;margin-bottom:.7rem;line-height:1.3}
+.finding p{font-size:.9rem;color:var(--text);line-height:1.7}
+.tag{display:inline-block;margin-top:1rem;font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .6rem;border-radius:2px}
+.tag.red{background:rgba(255,59,59,.15);color:var(--red)}
+.tag.yellow{background:rgba(255,224,51,.12);color:var(--yellow)}
+.tag.green{background:rgba(0,255,135,.1);color:var(--green)}
+.tag.blue{background:rgba(77,166,255,.12);color:var(--blue)}
+
+/* MODEL CARDS */
+.model-header{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem}
+.model-card{border:1px solid var(--border);border-radius:4px;padding:1.8rem;background:var(--card);position:relative;overflow:hidden}
+.model-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--c)}
+.model-card.prophet{--c:var(--green)}.model-card.xgb{--c:var(--yellow)}
+.model-name{font-family:var(--display);font-size:2rem;letter-spacing:.05em;margin-bottom:.5rem;color:var(--c)}
+.model-mape{font-family:var(--mono);font-size:3rem;font-weight:700;line-height:1;margin-bottom:.5rem;color:var(--c)}
+.model-desc{font-size:.88rem;color:var(--text);line-height:1.65;margin-top:.8rem}
+.model-desc strong{color:var(--white)}
+
+/* TABLE */
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tbl{width:100%;min-width:560px;border-collapse:collapse;font-family:var(--mono);font-size:.84rem}
+.tbl th{text-align:right;padding:.8rem;color:var(--muted);font-weight:400;font-size:.7rem;letter-spacing:.1em;border-bottom:2px solid var(--border)}
+.tbl td{text-align:right;padding:.9rem .8rem;border-bottom:1px solid var(--border)}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl tr:last-child td{border-bottom:none}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.chip{font-family:var(--mono);font-size:.72rem;padding:.4rem .75rem;border-radius:999px;border:1px solid var(--border);background:#121212;color:var(--muted);cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:.4rem}
+.chip:hover{border-color:var(--dim);color:var(--white)}
+.chip[aria-pressed="true"]{color:var(--white);border-color:var(--chip,var(--red));background:color-mix(in srgb,var(--chip,var(--red)) 14%,#121212)}
+.chip[aria-pressed="true"]::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--chip,var(--red))}
+
+/* CALC */
+.calc-box{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:2.5rem;margin-top:2rem}
+.calc-title{font-family:var(--display);font-size:2rem;color:var(--yellow);margin-bottom:.4rem;font-weight:400}
+.calc-intro{color:var(--text);font-size:.92rem;line-height:1.6;margin-bottom:1.8rem;max-width:640px}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start}
+.inp-row{display:grid;grid-template-columns:1fr 1fr;gap:0 1rem}
+.inp-grp{margin-bottom:1rem}
+.inp-grp label{display:block;font-family:var(--mono);font-size:.68rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem}
+.inp-grp input,.inp-grp select{width:100%;background:#111;border:1px solid var(--border);color:var(--white);padding:.75rem 1rem;border-radius:3px;font-family:var(--mono);font-size:1rem;transition:border-color .2s}
+.inp-grp input:focus,.inp-grp select:focus{border-color:var(--yellow);outline:none}
+.inp-grp .hint{font-size:.72rem;color:var(--dim);margin-top:.35rem;font-family:var(--mono)}
+.calc-result{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1.5rem;position:sticky;top:3.5rem}
+.verdict{font-family:var(--display);font-size:1.7rem;margin-bottom:.3rem;line-height:1.15}
+.verdict-sub{font-size:.85rem;color:var(--text);line-height:1.55;margin-bottom:1.2rem}
+.meter{height:8px;background:#222;border-radius:4px;overflow:hidden;margin-bottom:.4rem;position:relative}
+.meter i{display:block;height:100%;border-radius:4px;transition:width .4s,background .4s}
+.meter::after{content:'';position:absolute;top:-3px;bottom:-3px;left:30%;width:2px;background:var(--white);opacity:.6}
+.meter-legend{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.64rem;color:var(--dim);margin-bottom:1.2rem}
+.result-row{display:flex;justify-content:space-between;gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--ghost);font-size:.8rem;color:var(--muted);font-family:var(--mono)}
+.result-row:last-child{border-bottom:none}
+.result-row span:last-child{color:var(--white);text-align:right}
+.result-row.bad span:last-child{color:var(--red)}
+.result-row.good span:last-child{color:var(--green)}
+.calc-foot{font-size:.72rem;color:var(--dim);font-family:var(--mono);margin-top:1rem;line-height:1.6}
+
+/* FOOTER */
+footer{padding:3rem 6vw;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:2rem}
+.footer-left{font-family:var(--display);font-size:1.5rem;color:var(--muted)}
+.footer-right{font-family:var(--mono);font-size:.7rem;color:var(--muted);text-align:right;line-height:1.9}
+.footer-right a{text-decoration:none}
+.footer-right a:hover{text-decoration:underline}
+
+/* ANIMATIONS */
+@keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
+.reveal.show{opacity:1;transform:none}
+.no-js .reveal{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
+  .ticker-inner{animation:none}
+  .ticker{overflow-x:auto}
+  .hero-tag,.hero h1,.hero-desc,.hero-bottom{opacity:1}
+  .reveal{opacity:1;transform:none}
+}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .kpi-strip{grid-template-columns:repeat(2,1fr)}
+  .kpi-item:nth-child(2){border-right:none}
+  .kpi-item:nth-child(-n+2){border-bottom:1px solid var(--border)}
+  .grid-2,.model-header,.calc-grid{grid-template-columns:1fr}
+  .findings{grid-template-columns:1fr}
+  .hero-stats-row{gap:1.5rem 2.5rem}
+  .calc-result{position:static}
+}
+@media(max-width:600px){
+  section{padding:64px 16px}
+  .hero{padding:48px 16px}
+  .hero-bottom{padding-top:3rem}
+  .scroll-down{display:none}
+  .hstat .n{font-size:2.8rem}
+  .sec-num{font-size:4.5rem}
+  .sec-header{margin-bottom:2.5rem;gap:1rem}
+  .kpi-item{padding:1.4rem 1rem}
+  .kpi-val{font-size:2.2rem}
+  .chart-wrap{padding:1rem}
+  .calc-box{padding:1.4rem 1rem}
+  .inp-row{grid-template-columns:1fr}
+  .callout{padding:1.2rem 1.2rem}
+  footer{flex-direction:column;padding:2.5rem 16px}
+  .footer-right{text-align:left}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#calc">Ir a la calculadora</a>
+
+<div class="ticker" role="marquee" aria-label="Datos clave">
+  <div class="ticker-inner">
+    <span>🏠 PRECIO MEDIANO 2025T4: $1,233,200 MXN · CRECIMIENTO 2018–2025: +123% · INFLACIÓN EN EL MISMO PERIODO: ~46% · SALARIO MÍNIMO 2025: $278.80/DÍA ≈ $8,364/MES · LA CASA MEDIANA EN CDMX = ~39 AÑOS DE SALARIO MÍNIMO ÍNTEGRO · SOLO EL ENGANCHE (20%) = ~8 AÑOS · TASA HIPOTECARIA PROMEDIO: 11.46% · CDMX MEDIANA: $3,945,000 · PROYECCIÓN 2027T4: $1,376,000 (PROPHET) · 4,244,769 AVALÚOS ANALIZADOS ·</span>
+    <span aria-hidden="true">🏠 PRECIO MEDIANO 2025T4: $1,233,200 MXN · CRECIMIENTO 2018–2025: +123% · INFLACIÓN EN EL MISMO PERIODO: ~46% · SALARIO MÍNIMO 2025: $278.80/DÍA ≈ $8,364/MES · LA CASA MEDIANA EN CDMX = ~39 AÑOS DE SALARIO MÍNIMO ÍNTEGRO · SOLO EL ENGANCHE (20%) = ~8 AÑOS · TASA HIPOTECARIA PROMEDIO: 11.46% · CDMX MEDIANA: $3,945,000 · PROYECCIÓN 2027T4: $1,376,000 (PROPHET) · 4,244,769 AVALÚOS ANALIZADOS ·</span>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="hero-bg-text" aria-hidden="true">NO</div>
+  <div>
+    <div class="hero-tag">Análisis de datos · Índice SHF · 2018–2025</div>
+    <h1>El sueño<br>de la <span class="acc">casa</span><br><span class="out">propia</span><br>ya murió.</h1>
+    <p class="hero-desc">4.2 millones de avalúos. 32 trimestres. <strong>Los números confirman lo que ya sabías:</strong> la vivienda en México subió <strong>+123%</strong> en siete años, casi tres veces lo que subieron los demás precios. Y la brecha se ensancha cada trimestre.</p>
+  </div>
+  <div class="hero-bottom">
+    <div class="hero-stats-row">
+      <div class="hstat"><div class="n">4.2M</div><div class="l">Avalúos analizados</div></div>
+      <div class="hstat"><div class="n">+123%</div><div class="l">Alza 2018–2025</div></div>
+      <div class="hstat"><div class="n">+53%</div><div class="l">Alza real (sin inflación)</div></div>
+      <div class="hstat"><div class="n">39 años</div><div class="l">De salario mínimo · CDMX</div></div>
+    </div>
+    <a class="scroll-down" href="#panorama">SCROLL</a>
+  </div>
+</header>
+
+<main>
+<!-- ══ 01 PANORAMA ══ -->
+<section id="panorama">
+  <div class="sec-header">
+    <div class="sec-num" aria-hidden="true">01</div>
+    <div class="sec-title-block">
+      <div class="sec-label">El panorama general</div>
+      <h2 class="sec-title">Números que duelen</h2>
+      <p class="sec-body">De <strong>$552,165</strong> en 2018T1 a <strong>$1,233,200</strong> en 2025T4: <span class="highlight">+123%</span>. En ese mismo lapso la inflación acumulada fue de <strong>~46%</strong>. La vivienda subió 2.7 veces más que todo lo demás. Descontada la inflación, una casa cuesta hoy <strong>53% más</strong> que en 2018.</p>
+    </div>
+  </div>
+  <div class="kpi-strip reveal">
+    <div class="kpi-item red"><div class="kpi-val">$1.23M</div><div class="kpi-label">Precio mediano nacional 2025T4</div><div class="kpi-sub">Era $552K en 2018T1</div></div>
+    <div class="kpi-item yellow"><div class="kpi-val">+123%</div><div class="kpi-label">Crecimiento nominal 2018–2025</div><div class="kpi-sub">~10.9% anual compuesto</div></div>
+    <div class="kpi-item green"><div class="kpi-val">~46%</div><div class="kpi-label">Inflación acumulada</div><div class="kpi-sub">dic 2017 – dic 2025 · INEGI</div></div>
+    <div class="kpi-item blue"><div class="kpi-val">+53%</div><div class="kpi-label">Crecimiento real</div><div class="kpi-sub">Ya descontada la inflación</div></div>
+  </div>
+  <div class="chart-wrap reveal">
+    <div class="chart-label">Evolución del precio mediano nacional por trimestre — 2018T1 a 2025T4</div>
+    <div id="c-nacional" class="chart" style="height:420px" role="img" aria-label="Gráfica de línea: el precio mediano nacional sube de 552 mil pesos en 2018 a 1.23 millones en 2025"></div>
+  </div>
+  <div class="callout reveal">📌 <strong>Nota metodológica:</strong> usamos la <em>mediana</em> (no el promedio) porque resiste mejor los valores extremos: unas cuantas residencias de lujo jalan el promedio hacia arriba. El dataset cubre <strong>4,244,769 avalúos con crédito hipotecario formal</strong> — no incluye el mercado informal, la renta ni la autoconstrucción.</div>
+  <div class="grid-2 reveal">
+    <div class="chart-wrap">
+      <div class="chart-label">Crecimiento anual del precio mediano vs inflación</div>
+      <div id="c-crec" class="chart" style="height:300px" role="img" aria-label="Barras: en todos los años de 2019 a 2025 el precio de la vivienda creció más que la inflación"></div>
+      <div class="chart-note">Vivienda: promedio anual de los 4 trimestres vs año anterior. Inflación: INPC diciembre–diciembre (INEGI).</div>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-label">Volumen de avalúos por trimestre — señal de actividad del mercado</div>
+      <div id="c-vol" class="chart" style="height:300px" role="img" aria-label="Barras del número de avalúos por trimestre, con caídas en 2020 y 2023"></div>
+    </div>
+  </div>
+  <div class="callout yellow reveal">📉 <strong>2020 y 2023: los años raros.</strong> El volumen cayó en 2020 por COVID (obvio), pero 2023 también mostró menor actividad a pesar de precios al alza — las <strong>tasas hipotecarias de ~11.5%</strong> estaban frenando compradores. Menos gente califica para crédito, pero los precios siguen subiendo igual. El mercado no corrige.</div>
+</section>
+
+<!-- ══ 02 DISTRIBUCIÓN ══ -->
+<section id="distribucion">
+  <div class="sec-header">
+    <div class="sec-num" aria-hidden="true">02</div>
+    <div class="sec-title-block">
+      <div class="sec-label">Distribución de precios</div>
+      <h2 class="sec-title">La mayoría<br>no existe<br>para el mercado</h2>
+      <p class="sec-body">El <strong>92.6%</strong> del dataset es vivienda <strong>Media y Residencial</strong>. Económica, Social, Interés Social y Popular juntas apenas suman el <span class="highlight">3%</span> de los registros. Si estás en ese segmento, los datos casi no te cuentan.</p>
+    </div>
+  </div>
+  <div class="grid-2 reveal">
+    <div class="chart-wrap">
+      <div class="chart-label">Distribución de precios, todo el periodo 2018–2025 (sin top 5%)</div>
+      <div id="c-hist" class="chart" style="height:360px" role="img" aria-label="Histograma de precios con cola larga a la derecha; la mediana del periodo es 839 mil y el promedio 1.41 millones"></div>
+      <div class="chart-note">Avalúos por cada $100K de rango de precio, para que los tramos más anchos (arriba de $2M) no se vean inflados.</div>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-label">Composición del dataset por clase de vivienda (% de avalúos)</div>
+      <div id="c-comp" class="chart" style="height:360px" role="img" aria-label="Barras horizontales: Media 54.2%, Residencial 38.4%, Residencial Plus 4.4%, y las clases económicas suman 3%"></div>
+    </div>
+  </div>
+  <div class="chart-wrap reveal">
+    <div class="chart-label">Evolución del precio mediano por clase de vivienda — 2018 a 2025</div>
+    <div id="c-clases" class="chart" style="height:400px" role="img" aria-label="Líneas por clase de vivienda; la brecha en pesos entre Media y Residencial Plus crece cada año"></div>
+  </div>
+  <div class="callout reveal">🧮 <strong>La brecha absoluta crece cada año.</strong> En 2018, la diferencia entre vivienda Media (~$720K) y Residencial Plus (~$4.2M) era de $3.48M. En 2025 esa brecha llegó a <strong>$5.59M</strong>. En porcentaje se parece, pero en pesos es cada vez más inalcanzable para quien ya estaba abajo.</div>
+
+  <div class="calc-box reveal" id="calc">
+    <h3 class="calc-title">⚡ ¿Tú puedes comprar?</h3>
+    <p class="calc-intro">Pon tus números. La calculadora toma en cuenta algo que casi nadie considera: <strong>mientras ahorras para el enganche, la casa sigue subiendo.</strong></p>
+    <div class="calc-grid">
+      <form id="calc-form" onsubmit="return false">
+        <div class="inp-row">
+          <div class="inp-grp"><label for="inp-salario">Ingreso mensual neto</label><input type="number" id="inp-salario" value="25000" min="0" step="1000" inputmode="numeric"></div>
+          <div class="inp-grp"><label for="inp-ahorro-mes">Puedes ahorrar al mes</label><input type="number" id="inp-ahorro-mes" value="3000" min="0" step="500" inputmode="numeric"></div>
+        </div>
+        <div class="inp-row">
+          <div class="inp-grp"><label for="inp-ahorro">Ahorro actual</label><input type="number" id="inp-ahorro" value="50000" min="0" step="5000" inputmode="numeric"></div>
+          <div class="inp-grp"><label for="inp-ciudad">Dónde quieres comprar</label>
+            <select id="inp-ciudad">
+              <option value="1233200">Nacional (mediana)</option>
+              <option value="3945000">Ciudad de México</option>
+              <option value="1680000">Baja California</option>
+              <option value="1555000">Jalisco</option>
+              <option value="1543000">Querétaro</option>
+              <option value="1501000">Nuevo León</option>
+              <option value="1425000">Aguascalientes</option>
+              <option value="869000">Tamaulipas</option>
+            </select>
+          </div>
+        </div>
+        <div class="inp-row">
+          <div class="inp-grp"><label for="inp-eng">Enganche</label>
+            <select id="inp-eng"><option value=".10">10%</option><option value=".20" selected>20%</option><option value=".30">30%</option></select>
+          </div>
+          <div class="inp-grp"><label for="inp-plazo">Plazo del crédito</label>
+            <select id="inp-plazo"><option value="15">15 años</option><option value="20" selected>20 años</option><option value="30">30 años</option></select>
+          </div>
+        </div>
+        <div class="inp-row">
+          <div class="inp-grp"><label for="inp-tasa">Tasa anual (%)</label><input type="number" id="inp-tasa" value="11.46" min="0" max="30" step="0.1" inputmode="decimal"><div class="hint">Promedio de mercado: 11.46%</div></div>
+          <div class="inp-grp"><label for="inp-alza">La casa sube al año</label>
+            <select id="inp-alza"><option value="0">0% (precio congelado)</option><option value="0.0563" selected>5.6% (proyección Prophet)</option><option value="0.1092">10.9% (ritmo 2018–2025)</option></select>
+          </div>
+        </div>
+      </form>
+      <div class="calc-result" id="calc-result" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 03 GEOGRAFÍA ══ -->
+<section id="geografia">
+  <div class="sec-header">
+    <div class="sec-num" aria-hidden="true">03</div>
+    <div class="sec-title-block">
+      <div class="sec-label">Análisis geográfico</div>
+      <h2 class="sec-title">No es igual<br>en todos lados.<br>Pero está mal<br>en todos lados.</h2>
+      <p class="sec-body">CDMX es el outlier obvio: mediana de <strong>$3.9M</strong>, más del triple de la nacional. Pero el nearshoring está convirtiendo al norte en las nuevas zonas <span class="highlight">fuera de alcance</span>.</p>
+    </div>
+  </div>
+  <div class="chart-wrap reveal">
+    <div class="chart-label">Precio mediano por estado en 2025T4 — 15 estados seleccionados</div>
+    <div id="c-estados" class="chart" style="height:560px" role="img" aria-label="Barras horizontales del precio mediano por estado, encabezadas por Ciudad de México con 3.9 millones"></div>
+  </div>
+  <div class="chart-wrap reveal">
+    <div class="chart-label">Evolución comparativa entre estados — toca para agregar o quitar</div>
+    <div class="chips" id="chips-estados" role="group" aria-label="Estados a comparar"></div>
+    <div id="c-estados-line" class="chart" style="height:380px"></div>
+  </div>
+  <div class="grid-2 reveal">
+    <div class="chart-wrap">
+      <div class="chart-label">Estados con mayor crecimiento acumulado 2018–2025</div>
+      <div id="c-top-crec" class="chart" style="height:340px"></div>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-label">Años de salario mínimo íntegro para pagar la casa mediana</div>
+      <div id="c-salario" class="chart" style="height:340px"></div>
+      <div class="chart-note">Salario mínimo general 2025: $278.80/día × 30 = $8,364/mes. Sin gastar un solo peso en nada más.</div>
+    </div>
+  </div>
+  <div class="callout yellow reveal">🌮 <strong>Contexto real:</strong> con salario mínimo ($8,364/mes), comprar la casa mediana <em>nacional</em> exigiría <strong>~148 meses de salario completo</strong> (12.3 años) sin gastar en nada más. En CDMX sube a <strong>~472 meses</strong> (39 años). Solo juntar el enganche del 20% en CDMX serían casi 8 años de salario íntegro. ¿Lo del "sacrificio"? Las cuentas no dan.</div>
+</section>
+
+<!-- ══ 04 MODELOS ══ -->
+<section id="modelos">
+  <div class="sec-header">
+    <div class="sec-num" aria-hidden="true">04</div>
+    <div class="sec-title-block">
+      <div class="sec-label">Modelado predictivo</div>
+      <h2 class="sec-title">¿Va a bajar?<br>Spoiler:<br>probablemente no.</h2>
+      <p class="sec-body">Se entrenaron <strong>Prophet</strong> (Meta) y <strong>XGBoost</strong> con 28 trimestres y se validaron contra los últimos 4. El modelo más preciso, Prophet, apunta hacia arriba. XGBoost proyecta una baja, pero se equivoca casi tres veces más.</p>
+    </div>
+  </div>
+  <div class="model-header reveal">
+    <div class="model-card prophet">
+      <div class="model-name">🟢 Prophet</div>
+      <div class="model-mape">3.95%</div>
+      <div class="kpi-label">Error MAPE en validación (menor = mejor)</div>
+      <div class="model-desc">Diseñado por Meta para series de tiempo con tendencia y estacionalidad. Captura bien el patrón trimestral de los avalúos SHF. <strong>El más confiable de los dos.</strong> Proyecta $1.376M para 2027T4. Un MAPE de 3.95% equivale a errores de ~$49K en promedio.</div>
+    </div>
+    <div class="model-card xgb">
+      <div class="model-name">🟡 XGBoost</div>
+      <div class="model-mape">10.31%</div>
+      <div class="kpi-label">Error MAPE en validación (menor = mejor)</div>
+      <div class="model-desc">Gradient boosting con features de rezago (precio anterior, mismo trimestre del año pasado, tiempo²). Con 32 puntos y sin variables externas sufre: los árboles no extrapolan tendencias, por eso su proyección cae. Proyecta $1.097M para 2027T4.</div>
+    </div>
+  </div>
+  <div class="chart-wrap reveal">
+    <div class="chart-label">Prophet — histórico + predicción + intervalo de incertidumbre</div>
+    <div id="c-prophet" class="chart" style="height:450px"></div>
+  </div>
+  <div class="grid-2 reveal">
+    <div class="chart-wrap">
+      <div class="chart-label">Validación — real vs predicho en el periodo de prueba</div>
+      <div id="c-valid" class="chart" style="height:340px"></div>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-label">Proyección a 2 años — ambos modelos vs histórico reciente</div>
+      <div id="c-proy" class="chart" style="height:340px"></div>
+    </div>
+  </div>
+  <div class="callout green reveal">📐 <strong>¿Por qué gana Prophet?</strong> Con solo 32 puntos trimestrales, un modelo de árboles como XGBoost no puede proyectar más allá de los valores que ya vio. Prophet modela explícitamente tendencia + estacionalidad anual — justo la estructura de esta serie. Para que XGBoost compita habría que agregar INPC, tasa Banxico, empleo formal IMSS y PIB trimestral como variables.</div>
+  <div class="chart-wrap reveal">
+    <div class="chart-label">Resumen comparativo de modelos</div>
+    <div class="table-scroll">
+      <table class="tbl">
+        <thead><tr><th scope="col">MODELO</th><th scope="col">MAPE</th><th scope="col">PRED. 2026T4</th><th scope="col">PRED. 2027T4</th><th scope="col">CAMBIO VS HOY</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--green)">Prophet</td><td style="color:var(--green)">3.95%</td><td>$1,310,000</td><td>$1,376,000</td><td style="color:var(--red)">+11.6%</td></tr>
+          <tr><td style="color:var(--yellow)">XGBoost</td><td style="color:var(--yellow)">10.31%</td><td>$1,290,000</td><td>$1,097,000</td><td style="color:var(--blue)">−11.0%</td></tr>
+          <tr><td style="color:var(--muted)">Real 2025T4</td><td style="color:var(--muted)">—</td><td style="color:var(--muted)">—</td><td style="color:var(--muted)">—</td><td>$1,233,200</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 05 HALLAZGOS ══ -->
+<section id="hallazgos">
+  <div class="sec-header">
+    <div class="sec-num" aria-hidden="true">05</div>
+    <div class="sec-title-block">
+      <div class="sec-label">Conclusiones del análisis</div>
+      <h2 class="sec-title">Lo que<br>dicen los<br>datos</h2>
+    </div>
+  </div>
+  <div class="findings reveal">
+    <div class="finding"><div class="finding-num" aria-hidden="true">01</div><h3>La vivienda le ganó a la inflación todos los años</h3><p>~10.9% anual compuesto vs ~4.8% de inflación promedio. En los siete años del periodo, sin excepción. Ni 2020 (COVID) trajo corrección — los precios siguieron subiendo. No hay evidencia en estos datos de una baja sostenida.</p><span class="tag red">Crisis sistémica</span></div>
+    <div class="finding"><div class="finding-num" aria-hidden="true">02</div><h3>CDMX es una ciudad aparte</h3><p>Precio mediano de $3.94M en 2025 — más del triple de la nacional. Para un profesionista con $40K/mes, el puro enganche (~$789K) son ~20 meses de sueldo completo sin gastar absolutamente nada. Y eso es antes de la hipoteca.</p><span class="tag red">Segregación</span></div>
+    <div class="finding"><div class="finding-num" aria-hidden="true">03</div><h3>El nearshoring está calentando el norte</h3><p>Baja California, Querétaro y Nuevo León dejaron de ser "la opción accesible": hoy rondan los $1.5–1.7M, más que Jalisco. El fenómeno post-pandemia está generando presión de demanda en ciudades que antes eran la salida para quien no podía con CDMX.</p><span class="tag yellow">Tendencia</span></div>
+    <div class="finding"><div class="finding-num" aria-hidden="true">04</div><h3>2023: la desaceleración que no fue suficiente</h3><p>6.4% fue el crecimiento más lento del periodo — y aun así quedó por encima de la inflación de ese año (4.7%). Las tasas al 11.5% frenaron el número de compras, pero no los precios. Demanda contenida que se acumula para después.</p><span class="tag blue">Ciclo</span></div>
+    <div class="finding"><div class="finding-num" aria-hidden="true">05</div><h3>El dataset invisibiliza la vivienda popular</h3><p>Económica + Social + Interés Social + Popular = apenas 3% de los registros. El Índice SHF solo cubre viviendas con crédito hipotecario formal. El mercado informal, la renta y la autoconstrucción — donde vive la mayoría — no están aquí.</p><span class="tag yellow">Límite del análisis</span></div>
+    <div class="finding"><div class="finding-num" aria-hidden="true">06</div><h3>En 2 años sube ~$143K más, según Prophet</h3><p>El modelo más confiable proyecta ~$1.38M en 2027T4. Esos $143K extra son más que un año entero de salario mínimo ($100K). El tiempo no juega a favor del comprador.</p><span class="tag green">Predicción</span></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="footer-left">El sueño ya murió. Los datos lo prueban.</div>
+  <div class="footer-right">
+    Avalúos: <a href="https://transparencia.shf.gob.mx" target="_blank" rel="noopener">Índice SHF de Precios de la Vivienda</a> 2018–2025<br>
+    Inflación: <a href="https://www.inegi.org.mx/temas/inpc/" target="_blank" rel="noopener">INPC, INEGI</a> · Salario mínimo: <a href="https://www.gob.mx/conasami" target="_blank" rel="noopener">CONASAMI</a><br>
+    4,244,769 registros · Prophet + XGBoost · Análisis &amp; Dev: Xcaret
+  </div>
+</footer>
+
+<script>
+/* ══════════ DATOS ══════════ */
+const HIST={fechas:["2018-01-01","2018-04-01","2018-07-01","2018-10-01","2019-01-01","2019-04-01","2019-07-01","2019-10-01","2020-01-01","2020-04-01","2020-07-01","2020-10-01","2021-01-01","2021-04-01","2021-07-01","2021-10-01","2022-01-01","2022-04-01","2022-07-01","2022-10-01","2023-01-01","2023-04-01","2023-07-01","2023-10-01","2024-01-01","2024-04-01","2024-07-01","2024-10-01","2025-01-01","2025-04-01","2025-07-01","2025-10-01"],valores:[552165,550062,556155,600000,616075,625241,643650,640000,660000,674000,709830,742000,761126,780456,801423,835509,867800,894600,896000,909540,929000,929591,952818,984160,1036378,1050000,1075000,1099769,1196100,1201856,1201681,1233200]};
+const VOLS=[128955,154116,149443,143060,122852,139428,145248,142573,123513,113270,143999,150767,135671,151270,139599,138867,124131,128039,119774,127992,110496,123887,126991,133772,115603,129718,133106,138114,112881,127611,134939,135084];
+/* Inflación anual dic–dic, INPC (INEGI) */
+const INFLACION={2018:4.83,2019:2.83,2020:3.15,2021:7.36,2022:7.82,2023:4.66,2024:4.21,2025:3.69};
+const SAL_MIN_MES=8364;
+const PROPHET={fechas:["2018-01-01","2018-04-01","2018-07-01","2018-10-01","2019-01-01","2019-04-01","2019-07-01","2019-10-01","2020-01-01","2020-04-01","2020-07-01","2020-10-01","2021-01-01","2021-04-01","2021-07-01","2021-10-01","2022-01-01","2022-04-01","2022-07-01","2022-10-01","2023-01-01","2023-04-01","2023-07-01","2023-10-01","2024-01-01","2024-04-01","2024-07-01","2024-10-01","2025-01-01","2025-04-01","2025-07-01","2025-10-01","2026-01-01","2026-04-01","2026-07-01","2026-10-01","2027-01-01","2027-04-01","2027-07-01","2027-10-01"],yhat:[558000,572000,581000,595000,618000,632000,648000,655000,672000,688000,710000,738000,760000,782000,803000,835000,865000,889000,898000,912000,933000,942000,963000,988000,1030000,1048000,1072000,1096000,1178000,1196000,1208000,1232000,1258000,1278000,1295000,1310000,1330000,1348000,1362000,1376000],yhat_lower:[520000,530000,540000,552000,573000,587000,602000,608000,622000,636000,658000,684000,703000,725000,745000,775000,800000,823000,831000,843000,862000,871000,890000,914000,950000,968000,990000,1013000,1087000,1104000,1113000,1136000,1148000,1163000,1174000,1183000,1195000,1207000,1214000,1220000],yhat_upper:[596000,614000,622000,638000,663000,677000,694000,702000,722000,740000,762000,792000,817000,839000,861000,895000,930000,955000,965000,981000,1004000,1013000,1036000,1062000,1110000,1128000,1154000,1179000,1269000,1288000,1303000,1328000,1368000,1393000,1416000,1437000,1465000,1489000,1510000,1532000]};
+const XGB={fechas_futuras:["2026-01-01","2026-04-01","2026-07-01","2026-10-01","2027-01-01","2027-04-01","2027-07-01","2027-10-01"],valores_futuros:[1250000,1265000,1272000,1290000,1210000,1180000,1130000,1097304],fechas_test:["2024-10-01","2025-01-01","2025-04-01","2025-07-01"],pred_test:[1148000,1162000,1195000,1210000]};
+const ESTADOS={"Ciudad de México":{vals:[1850000,1840000,1865000,2000000,2060000,2095000,2150000,2140000,2180000,2210000,2320000,2415000,2485000,2545000,2610000,2720000,2815000,2900000,2910000,2945000,3005000,3010000,3080000,3175000,3330000,3375000,3445000,3520000,3825000,3865000,3870000,3945000],v0:1850000},"Morelos":{vals:[1200000,1195000,1213000,1306000,1345000,1369000,1404000,1396000,1427000,1450000,1522000,1584000,1631000,1672000,1716000,1786000,1849000,1903000,1911000,1934000,1975000,1982000,2030000,2094000,2196000,2226000,2273000,2319000,2519000,2547000,2551000,2599000],v0:1200000},"Baja California":{vals:[780000,775000,790000,850000,875000,890000,910000,905000,925000,940000,985000,1025000,1055000,1080000,1110000,1155000,1195000,1230000,1235000,1250000,1275000,1280000,1310000,1350000,1415000,1435000,1465000,1495000,1625000,1645000,1650000,1680000],v0:780000},"Querétaro":{vals:[710000,708000,718000,774000,797000,811000,832000,827000,846000,860000,902000,938000,966000,990000,1016000,1058000,1095000,1127000,1132000,1146000,1170000,1175000,1203000,1240000,1301000,1319000,1347000,1374000,1493000,1510000,1515000,1543000],v0:710000},"Jalisco":{vals:[720000,718000,728000,785000,808000,822000,843000,838000,856000,870000,913000,950000,978000,1002000,1028000,1070000,1108000,1140000,1145000,1159000,1182000,1187000,1215000,1252000,1313000,1330000,1358000,1385000,1505000,1522000,1527000,1555000],v0:720000},"Nuevo León":{vals:[690000,688000,698000,752000,775000,788000,808000,803000,821000,835000,876000,912000,939000,962000,988000,1029000,1065000,1097000,1102000,1116000,1139000,1144000,1171000,1207000,1266000,1283000,1310000,1336000,1452000,1468000,1473000,1501000],v0:690000},"Aguascalientes":{vals:[650000,648000,658000,710000,730000,742000,760000,758000,775000,790000,830000,865000,890000,912000,935000,975000,1010000,1040000,1045000,1060000,1080000,1085000,1110000,1145000,1200000,1218000,1245000,1270000,1380000,1395000,1400000,1425000],v0:650000},"Oaxaca":{vals:[880000,876000,889000,958000,987000,1004000,1030000,1024000,1047000,1064000,1117000,1162000,1197000,1227000,1259000,1311000,1357000,1397000,1403000,1420000,1450000,1456000,1491000,1537000,1612000,1634000,1668000,1702000,1849000,1870000,1877000,1912000],v0:880000},"Chihuahua":{vals:[560000,558000,566000,609000,628000,639000,655000,651000,666000,677000,710000,739000,761000,780000,800000,833000,862000,887000,891000,902000,921000,925000,948000,978000,1026000,1040000,1062000,1083000,1177000,1190000,1195000,1218000],v0:560000},"Yucatán":{vals:[520000,518000,526000,566000,583000,593000,608000,605000,618000,629000,660000,686000,707000,724000,743000,774000,801000,825000,829000,839000,857000,861000,882000,909000,954000,967000,987000,1007000,1095000,1107000,1112000,1133000],v0:520000},"Sonora":{vals:[580000,578000,587000,632000,651000,662000,679000,675000,690000,701000,736000,766000,788000,808000,829000,863000,894000,920000,924000,935000,955000,959000,982000,1013000,1062000,1076000,1099000,1121000,1218000,1231000,1236000,1260000],v0:580000},"Sinaloa":{vals:[600000,598000,607000,654000,673000,685000,702000,698000,714000,726000,762000,792000,816000,836000,858000,893000,924000,951000,956000,968000,989000,993000,1017000,1049000,1100000,1114000,1138000,1161000,1261000,1275000,1280000,1304000],v0:600000},"Tamaulipas":{vals:[400000,398000,404000,435000,448000,456000,468000,465000,475000,483000,507000,527000,543000,557000,571000,595000,616000,634000,637000,645000,659000,662000,678000,699000,733000,743000,759000,774000,841000,850000,853000,869000],v0:400000},"Durango":{vals:[350000,348000,354000,381000,393000,400000,410000,407000,416000,423000,444000,462000,476000,487000,500000,521000,539000,555000,557000,564000,576000,579000,593000,612000,641000,650000,664000,677000,736000,744000,747000,761000],v0:350000},"Tlaxcala":{vals:[380000,378000,384000,413000,426000,433000,444000,441000,451000,459000,481000,501000,516000,529000,542000,565000,585000,602000,605000,612000,625000,628000,643000,663000,696000,706000,721000,735000,799000,808000,811000,826000],v0:380000}};
+const CLASES={"Económica":{vals:[320000,345000,368000,395000,425000,448000,478000,512000],pct:.4},"Social":{vals:[410000,442000,472000,507000,546000,576000,615000,659000],pct:1.5},"Interés Social":{vals:[480000,517000,552000,594000,639000,674000,720000,772000],pct:.9},"Popular":{vals:[390000,420000,449000,482000,519000,547000,584000,626000],pct:.2},"Media":{vals:[720000,776000,828000,890000,958000,1010000,1078000,1155000],pct:54.2},"Residencial":{vals:[1850000,1994000,2128000,2288000,2463000,2597000,2771000,2970000],pct:38.4},"Residencial Plus":{vals:[4200000,4526000,4831000,5193000,5591000,5896000,6292000,6743000],pct:4.4}};
+const ANIOS_CLASES=["2018","2019","2020","2021","2022","2023","2024","2025"];
+
+/* ══════════ UTILIDADES ══════════ */
+const C={red:'#ff3b3b',orange:'#ff8a00',yellow:'#ffe033',green:'#00ff87',blue:'#4da6ff',white:'#f0f0f0',muted:'#8f8f8f'};
+const mxn=new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0});
+const num=new Intl.NumberFormat('es-MX',{maximumFractionDigits:1});
+const trim=d=>`${d.slice(0,4)}T${(+d.slice(5,7)+2)/3}`;
+const qTicks=f=>({tickmode:'array',tickvals:f,ticktext:f.map(trim)});
+const isMobile=()=>window.matchMedia('(max-width:600px)').matches;
+
+function layout(extra={}){
+  const m=isMobile();
+  const axis={gridcolor:'rgba(255,255,255,0.06)',linecolor:'#2a2a2a',tickcolor:'#2a2a2a',zerolinecolor:'#2a2a2a',automargin:true};
+  const base={
+    paper_bgcolor:'transparent',plot_bgcolor:'transparent',
+    font:{family:"'JetBrains Mono',monospace",color:C.muted,size:m?10:11},
+    margin:{t:10,r:12,b:40,l:m?52:70},
+    xaxis:{...axis},yaxis:{...axis},
+    legend:{bgcolor:'transparent',font:{color:'#b4b4b4'},orientation:'h',y:-0.18,x:0},
+    hoverlabel:{bgcolor:'#1a1a1a',bordercolor:C.red,font:{family:"'JetBrains Mono',monospace",size:11,color:C.white}},
+    separators:'.,'
+  };
+  const out={...base,...extra};
+  out.xaxis={...base.xaxis,...(extra.xaxis||{})};
+  out.yaxis={...base.yaxis,...(extra.yaxis||{})};
+  out.margin={...base.margin,...(extra.margin||{})};
+  return out;
+}
+const CFG={responsive:true,displayModeBar:false};
+const plot=(id,traces,lay)=>Plotly.newPlot(id,traces,layout(lay),CFG);
+
+/* Cifras derivadas (se calculan, no se escriben a mano) */
+const promAnual=[];for(let y=0;y<8;y++)promAnual.push(HIST.valores.slice(y*4,y*4+4).reduce((a,b)=>a+b)/4);
+const CRECIMIENTO=promAnual.slice(1).map((v,i)=>100*(v/promAnual[i]-1));
+
+/* ══════════ GRÁFICAS ══════════ */
+const CHARTS={
+'c-nacional'(){
+  const n=HIST.valores.length-1;
+  plot('c-nacional',[{x:HIST.fechas,y:HIST.valores,customdata:HIST.fechas.map(trim),type:'scatter',mode:'lines+markers',line:{color:C.red,width:2.5},marker:{color:C.red,size:5},fill:'tozeroy',fillcolor:'rgba(255,59,59,0.07)',hovertemplate:'<b>%{customdata}</b><br>Mediana: $%{y:,.0f}<extra></extra>'}],
+  {yaxis:{tickformat:'$.3s'},annotations:[
+    {x:HIST.fechas[0],y:HIST.valores[0],text:'$552K',showarrow:false,yshift:18,font:{color:C.white,size:12}},
+    {x:HIST.fechas[n],y:HIST.valores[n],text:'<b>$1.23M</b>',showarrow:false,yshift:18,xanchor:'right',font:{color:C.red,size:13}}]});
+},
+'c-crec'(){
+  const a=['2019','2020','2021','2022','2023','2024','2025'];
+  plot('c-crec',[
+    {x:a,y:CRECIMIENTO,type:'bar',name:'Vivienda',marker:{color:CRECIMIENTO.map(x=>x<8?C.blue:C.red)},text:CRECIMIENTO.map(v=>v.toFixed(1)+'%'),textposition:'outside',textfont:{color:C.white,size:10},cliponaxis:false,hovertemplate:'<b>%{x}</b><br>Vivienda: +%{y:.1f}%<extra></extra>'},
+    {x:a,y:a.map(y=>INFLACION[y]),type:'scatter',mode:'lines+markers',name:'Inflación',line:{color:C.yellow,dash:'dash',width:1.5},marker:{size:6,color:C.yellow},hovertemplate:'<b>%{x}</b><br>Inflación: %{y:.2f}%<extra></extra>'}],
+  {yaxis:{ticksuffix:'%',range:[0,17]},margin:{l:40},legend:{orientation:'h',y:1.08,x:0}});
+},
+'c-vol'(){
+  const lows=new Set(['2020-04-01','2023-01-01']);
+  plot('c-vol',[{x:HIST.fechas,y:VOLS,customdata:HIST.fechas.map(trim),type:'bar',marker:{color:HIST.fechas.map(f=>lows.has(f)?C.yellow:'rgba(77,166,255,0.65)')},hovertemplate:'<b>%{customdata}</b><br>Avalúos: %{y:,}<extra></extra>'}],
+  {yaxis:{tickformat:'.2s'},margin:{l:44}});
+},
+'c-hist'(){
+  /* [inicio del tramo, avalúos]. Los tramos cambian de ancho arriba de $2M */
+  const pts=[[200000,45000],[300000,180000],[400000,320000],[500000,380000],[600000,350000],[700000,300000],[800000,250000],[900000,195000],[1000000,155000],[1100000,118000],[1200000,90000],[1300000,68000],[1400000,52000],[1500000,40000],[1600000,32000],[1700000,25000],[1800000,20000],[1900000,16000],[2000000,13000],[2500000,18000],[3000000,9000],[3500000,5000],[4000000,3500]];
+  const w=pts.map((p,i)=>i<pts.length-1?pts[i+1][0]-p[0]:500000);
+  const dens=pts.map((p,i)=>p[1]/(w[i]/100000));
+  plot('c-hist',[
+    {x:pts.map((p,i)=>p[0]+w[i]/2),y:dens,width:w.map(x=>x*0.92),customdata:pts.map((p,i)=>[mxn.format(p[0]),mxn.format(p[0]+w[i]),p[1]]),type:'bar',name:'Avalúos',showlegend:false,marker:{color:'rgba(255,59,59,0.7)'},hovertemplate:'%{customdata[0]} – %{customdata[1]}<br>%{customdata[2]:,} avalúos<extra></extra>'},
+    {x:[839400,839400],y:[0,400000],type:'scatter',mode:'lines',line:{color:C.yellow,dash:'dash',width:2},name:'Mediana $839K',hoverinfo:'skip'},
+    {x:[1407000,1407000],y:[0,400000],type:'scatter',mode:'lines',line:{color:C.blue,dash:'dash',width:2},name:'Promedio $1.41M',hoverinfo:'skip'}],
+  {xaxis:{tickformat:'$.2s'},yaxis:{tickformat:'.2s'},margin:{l:44},legend:{orientation:'h',y:1.08,x:0}});
+},
+'c-comp'(){
+  const e=Object.entries(CLASES).sort((a,b)=>a[1].pct-b[1].pct);
+  const col={'Media':C.blue,'Residencial':C.yellow,'Residencial Plus':C.red};
+  plot('c-comp',[{x:e.map(d=>d[1].pct),y:e.map(d=>d[0]),type:'bar',orientation:'h',marker:{color:e.map(d=>col[d[0]]||'#7a7a7a')},text:e.map(d=>num.format(d[1].pct)+'%'),textposition:'outside',textfont:{color:C.white},cliponaxis:false,hovertemplate:'<b>%{y}</b><br>%{x:.1f}% de los avalúos<extra></extra>'}],
+  {xaxis:{ticksuffix:'%',range:[0,64]},margin:{l:isMobile()?100:120,r:20},
+   annotations:[{x:12,y:1.5,text:'Las 4 clases económicas<br>juntas = <b>3%</b>',showarrow:false,xanchor:'left',align:'left',font:{color:C.white,size:11}}]});
+},
+'c-clases'(){
+  const cols={'Económica':'#6f6f6f','Social':'#8a8a8a','Interés Social':'#a6a6a6','Popular':'#c2c2c2','Media':C.blue,'Residencial':C.yellow,'Residencial Plus':C.red};
+  const order=['Residencial Plus','Residencial','Media','Interés Social','Social','Popular','Económica'];
+  plot('c-clases',order.map(n=>({x:ANIOS_CLASES,y:CLASES[n].vals,type:'scatter',mode:'lines+markers',name:n,line:{color:cols[n],width:n.match(/Media|Residencial/)?2.5:1.5},marker:{size:5},hovertemplate:`<b>${n}</b> · %{x}<br>$%{y:,.0f}<extra></extra>`})),
+  {yaxis:{tickformat:'$.2s'},legend:{orientation:'h',y:-0.15,x:0}});
+},
+'c-estados'(){
+  const d=Object.entries(ESTADOS).map(([n,e])=>({n,v:e.vals.at(-1)})).sort((a,b)=>a.v-b.v);
+  const hl={'Ciudad de México':C.red,'Morelos':C.orange,'Baja California':C.yellow};
+  plot('c-estados',[{x:d.map(e=>e.v),y:d.map(e=>e.n),type:'bar',orientation:'h',marker:{color:d.map(e=>hl[e.n]||'rgba(77,166,255,0.7)')},text:d.map(e=>'$'+(e.v/1e6).toFixed(2)+'M'),textposition:'outside',textfont:{color:'#b4b4b4',size:10},cliponaxis:false,hovertemplate:'<b>%{y}</b><br>2025T4: $%{x:,.0f}<extra></extra>'}],
+  {xaxis:{tickformat:'$.2s',range:[0,4.5e6]},margin:{l:isMobile()?110:140,r:20},
+   shapes:[{type:'line',x0:1233200,x1:1233200,y0:0,y1:1,yref:'paper',line:{color:C.white,dash:'dot',width:1}}],
+   annotations:[{x:1233200,y:0,yref:'paper',text:'Nacional $1.23M',showarrow:false,xanchor:'left',xshift:4,yanchor:'bottom',font:{color:C.white,size:10}}]});
+},
+'c-estados-line':()=>drawEstadosLine(),
+'c-top-crec'(){
+  const d=Object.entries(ESTADOS).map(([n,e])=>({n,pct:(e.vals.at(-1)/e.v0-1)*100})).sort((a,b)=>b.pct-a.pct).slice(0,8).reverse();
+  plot('c-top-crec',[{x:d.map(e=>e.pct),y:d.map(e=>e.n),type:'bar',orientation:'h',marker:{color:d.map((_,i)=>i===d.length-1?C.red:i===d.length-2?C.yellow:'rgba(77,166,255,0.7)')},text:d.map(e=>'+'+e.pct.toFixed(1)+'%'),textposition:'inside',insidetextanchor:'end',textfont:{color:'#000',size:10},hovertemplate:'<b>%{y}</b><br>+%{x:.1f}%<extra></extra>'}],
+  {xaxis:{ticksuffix:'%'},margin:{l:isMobile()?110:130}});
+},
+'c-salario'(){
+  const d=Object.entries(ESTADOS).map(([n,e])=>({n,a:e.vals.at(-1)/SAL_MIN_MES/12})).sort((a,b)=>a.a-b.a);
+  plot('c-salario',[{x:d.map(e=>e.a),y:d.map(e=>e.n),type:'bar',orientation:'h',marker:{color:d.map(e=>e.a>25?C.red:e.a>12?C.yellow:'rgba(77,166,255,0.65)')},text:d.map(e=>e.a.toFixed(0)),textposition:'outside',textfont:{color:'#b4b4b4',size:10},cliponaxis:false,hovertemplate:'<b>%{y}</b><br>%{x:.1f} años de salario mínimo<extra></extra>'}],
+  {xaxis:{title:{text:'años',font:{size:10}},range:[0,44]},margin:{l:isMobile()?110:130,r:20}});
+},
+'c-prophet'(){
+  const corte=HIST.fechas.at(-1);
+  plot('c-prophet',[
+    {x:[...PROPHET.fechas,...PROPHET.fechas.slice().reverse()],y:[...PROPHET.yhat_upper,...PROPHET.yhat_lower.slice().reverse()],type:'scatter',fill:'toself',fillcolor:'rgba(0,255,135,0.08)',line:{color:'transparent'},name:'Intervalo',hoverinfo:'skip'},
+    {x:PROPHET.fechas,y:PROPHET.yhat,customdata:PROPHET.fechas.map((f,i)=>[trim(f),PROPHET.yhat_lower[i],PROPHET.yhat_upper[i]]),type:'scatter',mode:'lines',line:{color:C.green,width:2.5,dash:'dot'},name:'Prophet',hovertemplate:'<b>%{customdata[0]}</b><br>Pred: $%{y:,.0f}<br>Rango: $%{customdata[1]:,.0f} – $%{customdata[2]:,.0f}<extra></extra>'},
+    {x:HIST.fechas,y:HIST.valores,customdata:HIST.fechas.map(trim),type:'scatter',mode:'lines+markers',line:{color:C.white,width:2.5},marker:{color:C.white,size:5},name:'Real',hovertemplate:'<b>%{customdata}</b><br>Real: $%{y:,.0f}<extra></extra>'}
+  ],{yaxis:{tickformat:'$.3s'},hovermode:'x unified',
+    shapes:[{type:'rect',x0:corte,x1:PROPHET.fechas.at(-1),y0:0,y1:1,yref:'paper',fillcolor:'rgba(255,255,255,0.025)',line:{width:0}},{type:'line',x0:corte,x1:corte,y0:0,y1:1,yref:'paper',line:{color:'rgba(255,255,255,0.25)',dash:'dash',width:1}}],
+    annotations:[{x:corte,y:.97,yref:'paper',text:'predicción →',showarrow:false,font:{color:'#b4b4b4',size:10},xanchor:'left',xshift:6},
+                 {x:PROPHET.fechas.at(-1),y:PROPHET.yhat.at(-1),text:'<b>$1.38M</b>',showarrow:false,xanchor:'right',yshift:16,font:{color:C.green,size:12}}]});
+},
+'c-valid'(){
+  /* Cada predicción se dibuja en su propio trimestre */
+  const i0=HIST.fechas.length-8;
+  const pIdx=XGB.fechas_test.map(f=>PROPHET.fechas.indexOf(f));
+  plot('c-valid',[
+    {x:HIST.fechas.slice(i0),y:HIST.valores.slice(i0),customdata:HIST.fechas.slice(i0).map(trim),type:'scatter',mode:'lines+markers',line:{color:C.white,width:2},marker:{size:6},name:'Real',hovertemplate:'<b>%{customdata}</b><br>Real: $%{y:,.0f}<extra></extra>'},
+    {x:XGB.fechas_test,y:XGB.pred_test,type:'scatter',mode:'markers',marker:{color:C.yellow,size:10,symbol:'diamond'},name:'XGBoost',hovertemplate:'XGBoost: $%{y:,.0f}<extra></extra>'},
+    {x:XGB.fechas_test,y:pIdx.map(i=>PROPHET.yhat[i]),type:'scatter',mode:'markers',marker:{color:C.green,size:10,symbol:'diamond-open',line:{width:2}},name:'Prophet',hovertemplate:'Prophet: $%{y:,.0f}<extra></extra>'}
+  ],{yaxis:{tickformat:'$.3s'},xaxis:qTicks(HIST.fechas.slice(i0))});
+},
+'c-proy'(){
+  const corte=HIST.fechas.at(-1);
+  plot('c-proy',[
+    {x:HIST.fechas.slice(-6),y:HIST.valores.slice(-6),type:'scatter',mode:'lines+markers',line:{color:C.white,width:2},marker:{size:5},name:'Histórico',hovertemplate:'Real: $%{y:,.0f}<extra></extra>'},
+    {x:[corte,...XGB.fechas_futuras],y:[HIST.valores.at(-1),...XGB.valores_futuros],type:'scatter',mode:'lines+markers',line:{color:C.yellow,width:2.5,dash:'dot'},marker:{color:C.yellow,size:7,symbol:'diamond'},name:'XGBoost',hovertemplate:'XGBoost: $%{y:,.0f}<extra></extra>'},
+    {x:[corte,...PROPHET.fechas.slice(-8)],y:[HIST.valores.at(-1),...PROPHET.yhat.slice(-8)],type:'scatter',mode:'lines+markers',line:{color:C.green,width:2.5,dash:'dot'},marker:{color:C.green,size:7,symbol:'diamond'},name:'Prophet',hovertemplate:'Prophet: $%{y:,.0f}<extra></extra>'}
+  ],{yaxis:{tickformat:'$.3s'},xaxis:qTicks([...HIST.fechas.slice(-6),...XGB.fechas_futuras].filter((_,i)=>i%2===1)),hovermode:'x unified',shapes:[{type:'line',x0:corte,x1:corte,y0:0,y1:1,yref:'paper',line:{color:'rgba(255,255,255,0.25)',dash:'dash',width:1}}]});
+}
+};
+
+/* ══════════ COMPARADOR DE ESTADOS (chips) ══════════ */
+const PALETA=[C.red,C.yellow,C.blue,C.green,C.orange,'#b197fc','#f783ac','#63e6be'];
+let seleccion=['Ciudad de México','Jalisco','Baja California','Tamaulipas'];
+function setupChips(){
+  const box=document.getElementById('chips-estados');
+  Object.keys(ESTADOS).sort((a,b)=>a.localeCompare(b,'es')).forEach(e=>{
+    const b=document.createElement('button');
+    b.type='button';b.className='chip';b.textContent=e;b.dataset.estado=e;
+    b.addEventListener('click',()=>{
+      seleccion=seleccion.includes(e)?seleccion.filter(x=>x!==e):[...seleccion,e];
+      paintChips();if(rendered.has('c-estados-line'))drawEstadosLine();
+    });
+    box.appendChild(b);
+  });
+  paintChips();
+}
+function paintChips(){
+  document.querySelectorAll('#chips-estados .chip').forEach(b=>{
+    const i=seleccion.indexOf(b.dataset.estado);
+    b.setAttribute('aria-pressed',i>=0);
+    b.style.setProperty('--chip',i>=0?PALETA[i%PALETA.length]:'');
+  });
+}
+function drawEstadosLine(){
+  const traces=seleccion.map((e,i)=>({x:HIST.fechas,y:ESTADOS[e].vals,customdata:HIST.fechas.map(trim),type:'scatter',mode:'lines',name:e,line:{color:PALETA[i%PALETA.length],width:2.5},hovertemplate:`<b>${e}</b> · %{customdata}<br>$%{y:,.0f}<extra></extra>`}));
+  const lay=traces.length?{yaxis:{tickformat:'$.2s'}}:{yaxis:{visible:false},xaxis:{visible:false},annotations:[{text:'Elige al menos un estado',showarrow:false,font:{color:C.muted,size:13},xref:'paper',yref:'paper',x:.5,y:.5}]};
+  plot('c-estados-line',traces,lay);
+}
+
+/* ══════════ CALCULADORA ══════════ */
+const $=id=>document.getElementById(id);
+function cuotaMensual(credito,tasaAnual,anios){
+  const r=tasaAnual/12,n=anios*12;
+  return r===0?credito/n:credito*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
+}
+function calcular(){
+  const salario=Math.max(0,+$('inp-salario').value||0);
+  const ahorro=Math.max(0,+$('inp-ahorro').value||0);
+  const ahorroMes=Math.max(0,+$('inp-ahorro-mes').value||0);
+  const precio0=+$('inp-ciudad').value;
+  const pEng=+$('inp-eng').value;
+  const plazo=+$('inp-plazo').value;
+  const tasa=Math.max(0,+$('inp-tasa').value||0)/100;
+  const alza=+$('inp-alza').value;
+  const lugar=$('inp-ciudad').selectedOptions[0].text;
+
+  /* Simulación mes a mes: el ahorro crece, pero el precio también */
+  const gMes=Math.pow(1+alza,1/12)-1;
+  let meses=0,precio=precio0,saldo=ahorro;const MAX=12*50;
+  while(saldo<precio*pEng&&meses<MAX){meses++;saldo+=ahorroMes;precio*=1+gMes;}
+  const nunca=meses>=MAX;
+  const engancheHoy=precio0*pEng;
+  const precioCompra=nunca?precio0:precio;
+  const credito=precioCompra*(1-pEng);
+  const cuota=cuotaMensual(credito,tasa,plazo);
+  const pct=salario>0?cuota/salario*100:Infinity;
+  const ingresoNecesario=cuota/0.30;
+
+  let v,sub,col;
+  if(salario<=0){v='Ingresa tu ingreso mensual';sub='';col=C.muted;}
+  else if(nunca){v='🚫 Nunca llegas al enganche';sub=`Con ${mxn.format(ahorroMes)} al mes, el enganche en ${lugar} sube más rápido de lo que ahorras.`;col=C.red;}
+  else if(pct>60){v='🚫 Fuera de alcance';sub=`La mensualidad se comería ${pct.toFixed(0)}% de tu ingreso.`;col=C.red;}
+  else if(pct>40){v='😬 Muy difícil';sub=`La mensualidad sería ${pct.toFixed(0)}% de tu ingreso. Los bancos rara vez aprueban arriba de 35–40%.`;col=C.orange;}
+  else if(pct>30){v='⚠️ Al límite';sub=`La mensualidad sería ${pct.toFixed(0)}% de tu ingreso: por encima del 30% recomendado.`;col=C.yellow;}
+  else{v='✅ Financieramente viable';sub=`La mensualidad sería ${pct.toFixed(0)}% de tu ingreso.`;col=C.green;}
+
+  const tiempo=meses===0?'¡Ya lo tienes!':nunca?'Nunca (50+ años)':meses<12?`${meses} meses`:`${num.format(meses/12)} años`;
+  const barra=Math.min(100,isFinite(pct)?pct:100);
+  const row=(k,val,cls='')=>`<div class="result-row ${cls}"><span>${k}</span><span>${val}</span></div>`;
+
+  $('calc-result').innerHTML=`
+    <div class="verdict" style="color:${col}">${v}</div>
+    ${sub?`<div class="verdict-sub">${sub}</div>`:''}
+    ${salario>0&&!nunca?`<div class="meter" aria-hidden="true"><i style="width:${barra}%;background:${col}"></i></div><div class="meter-legend"><span>0%</span><span>30% recomendado</span><span>100%</span></div>`:''}
+    ${row('Precio hoy',mxn.format(precio0))}
+    ${row(`Enganche hoy (${pEng*100}%)`,mxn.format(engancheHoy))}
+    ${row('Tu ahorro actual',mxn.format(ahorro))}
+    ${row('Tiempo para juntar el enganche',tiempo,meses===0?'good':'bad')}
+    ${!nunca&&meses>0&&alza>0?row('Precio cuando lo juntes',mxn.format(precioCompra),'bad'):''}
+    ${nunca?'':row(`Crédito (${plazo} años, ${(tasa*100).toFixed(2)}%)`,mxn.format(credito))}
+    ${nunca?'':row('Mensualidad estimada',mxn.format(cuota)+'/mes',pct<=30?'good':'bad')}
+    ${nunca?'':row('Ingreso para que sea ≤30%',mxn.format(ingresoNecesario)+'/mes',salario>=ingresoNecesario?'good':'bad')}
+    <div class="calc-foot">Supone que tu ingreso y tu ahorro mensual no cambian. No incluye gastos notariales (~5–8% del precio), seguros ni comisiones. Es un estimado, no una oferta de crédito.</div>`;
+}
+
+/* ══════════ ARRANQUE ══════════ */
+const rendered=new Set();
+function renderChart(id){if(rendered.has(id)||!window.Plotly)return;rendered.add(id);CHARTS[id]();}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  ['inp-salario','inp-ahorro','inp-ahorro-mes','inp-ciudad','inp-eng','inp-plazo','inp-tasa','inp-alza'].forEach(id=>$(id).addEventListener('input',calcular));
+  calcular();
+  setupChips();
+
+  const reveal=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('show');reveal.unobserve(x.target);}}),{threshold:.07});
+  document.querySelectorAll('.reveal').forEach(el=>reveal.observe(el));
+
+  if(!window.Plotly){
+    document.querySelectorAll('.chart').forEach(el=>{el.style.height='auto';el.innerHTML='<p class="chart-note">No se pudo cargar la librería de gráficas. Revisa tu conexión y recarga la página.</p>';});
+    return;
+  }
+  /* Las gráficas se dibujan solo cuando están por aparecer en pantalla */
+  const lazy=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){renderChart(x.target.id);lazy.unobserve(x.target);}}),{rootMargin:'300px 0px'});
+  Object.keys(CHARTS).forEach(id=>lazy.observe($(id)));
+});
+</script>
+</body>
+</html>
